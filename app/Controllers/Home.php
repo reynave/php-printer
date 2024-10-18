@@ -12,30 +12,40 @@ class Home extends BaseController
 {
     public function index()
     {
-        $q1 = "SELECT *  FROM auto_number limit 1";
-        $items = $this->db->query($q1)->getResultArray();
-
+  
         $data = array(
             "error" => false,
-            "con" => 200,
-            "items" => $items,
+            "date" => date("Y-m-d H:i:s"),
 
         );
         return $this->response->setJSON($data);
     }
 
- 
-    public function start()
+    function test()
     {
-      
+        $post = $this->request->getVar();
         $data = array(
-            "error" => false,
-            "cashIn" => (int)model("Core")->select("cashIn","cso2_balance"," close = 0 AND transactionId = '_S1' "), 
-            
+            "error" => true,
+            "post" => $post,
         );
+        if($post['name']){ 
+            $printer = $post['name']; 
+ 
+            $profile = CapabilityProfile::load("simple");
+            $connector = new WindowsPrintConnector($printer);
+            $printer = new Printer($connector, $profile);
+            $printer->text("\n\n\n" . $post['text'] . "\n\n\n");
+            $printer->cut();
+            $printer->close();
+             
+            $data = array(
+                "printer" => $printer,
+                "post" => $post,
+            );
+        }
         return $this->response->setJSON($data);
     }
-
+    
     function cashDrawer()
     {
         //$post = json_decode(file_get_contents('php://input'), true);
